@@ -22,7 +22,7 @@ elif selected == "🧾 Farmer Credit Profile":
 elif selected == "📊 Lender Dashboard":
     import lender_dashboard  # lender_dashboard.py
 elif selected == "📈 Insights & Feature Analysis":
-    import _InsightsFeatureAnalysis  # insights_analysis.py
+    import InsightsFeatureAnalysis  # insights_analysis.py
 
 
 st.markdown("---")

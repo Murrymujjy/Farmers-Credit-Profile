@@ -5,13 +5,12 @@ import os
 # Set OpenAI API key (for local dev: set an env variable; on cloud, use Streamlit secrets)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-
 st.set_page_config(page_title="🤖 AI Credit Chatbot")
 st.title("🤖 AI Chatbot for Farmer Credit Scoring")
 
 st.markdown("Ask questions like:")
 st.markdown("- *Will a 40-year-old farmer in rural area with secondary education get a loan?*")
-st.markdown("- *What’s the credit score of a woman with access to phone and tertiary education?*")
+st.markdown("- *What is the credit score of a woman with access to phone and tertiary education?*")
 
 # Chat history
 if "messages" not in st.session_state:

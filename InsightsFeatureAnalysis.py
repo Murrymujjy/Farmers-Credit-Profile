@@ -14,7 +14,7 @@ def render():
     st.title("📈 Insights & Feature Analysis")
 
     # Load the model for SHAP (Random Forest is best for feature importance)
-    model = joblib.load("models/models_random_forest_model.pkl")
+    model = joblib.load("models/models_random_forest.pkl")
 
     st.markdown("### 📂 Upload Farmer Dataset")
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
