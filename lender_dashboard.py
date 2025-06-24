@@ -9,8 +9,8 @@ st.title("📊 Lender Dashboard - Farmer Credit Risk")
 # Load models
 models = {
     "Logistic Regression": joblib.load("models_logistic_regression_model.pkl"),
-    "Random Forest": joblib.load("models_random_forest.pkl"),
-    "Decision Tree": joblib.load("models_decision_tree.pkl")
+    "Random Forest": joblib.load("models_random_forest_model.pkl"),
+    "Decision Tree": joblib.load("models_decision_tree_model.pkl")
 }
 
 # Education mapping
