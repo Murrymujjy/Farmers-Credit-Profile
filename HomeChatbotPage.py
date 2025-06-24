@@ -2,6 +2,10 @@ import streamlit as st
 import openai
 import os
 
+# Set OpenAI API key (for local dev: set an env variable; on cloud, use Streamlit secrets)
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
 st.set_page_config(page_title="🤖 AI Credit Chatbot")
 st.title("🤖 AI Chatbot for Farmer Credit Scoring")
 
