@@ -4,9 +4,9 @@ import joblib
 
 # Load models
 models = {
-    "Logistic Regression": joblib.load("models_logistic_model.pkl"),
-    "Random Forest": joblib.load("models_random_forest.pkl"),
-    "Decision Tree": joblib.load("models_decision_tree.pkl")
+    "Logistic Regression": joblib.load("models_logistic_regression_model.pkl"),
+    "Random Forest": joblib.load("models_random_forest_model.pkl"),
+    "Decision Tree": joblib.load("models_decision_tree_model.pkl")
 }
 
 st.title("📋 Farmer Credit Profile & Scoring")
@@ -56,7 +56,7 @@ if submit:
     education_encoded = education_mapping.get(education, 8)  # fallback to 'Other'
     sector_map = {"Urban": 0, "Rural": 1}
 
-    X = np.array([[age, years, education_encoded[education],
+    X = np.array([[age, years, education_encoded,
                    1 if phone == "Yes" else 0,
                    sector_map[sector],
                    1 if women_access == "Yes" else 0]])
@@ -88,5 +88,3 @@ if submit:
     - Join cooperative or women-focused support groups
     """)
 
-st.markdown("---")
-st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
