@@ -14,7 +14,7 @@ def render():
     st.title("📈 Insights & Feature Analysis")
 
     # Load model
-    model = joblib.load("models/models_random_forest_model.pkl")
+    model = joblib.load("models_random_forest_model.pkl")
 
     st.markdown("### 📂 Upload Farmer Dataset")
     uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
