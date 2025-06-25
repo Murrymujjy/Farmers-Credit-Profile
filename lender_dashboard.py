@@ -4,7 +4,8 @@ import numpy as np
 import joblib
 import plotly.express as px
 
-st.title("📊 Lender Dashboard - Farmer Credit Risk")
+def render():  # 👈 required for app.py to import and call it
+    st.title("📊 Lender Dashboard - Farmer Credit Risk")
 
 # Load models
 models = {
