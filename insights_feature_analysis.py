@@ -10,17 +10,16 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
-def render():
-    st.title("📈 Insights & Feature Analysis")
+st.title("📈 Insights & Feature Analysis")
 
-    # Load the model for SHAP (Random Forest is best for feature importance)
-    model = joblib.load("models/models_random_forest_model.pkl")
+    # Load the model for SHAP (Random Forest is best for feature importance)    
+model = joblib.load("models/models_random_forest_model.pkl")
 
-    st.markdown("### 📂 Upload Farmer Dataset")
-    uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+st.markdown("### 📂 Upload Farmer Dataset")
+uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+if uploaded_file:
+   df = pd.read_csv(uploaded_file)
 
         # Map and encode inputs
         education_mapping = {
