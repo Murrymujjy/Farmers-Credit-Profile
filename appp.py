@@ -14,16 +14,18 @@ with st.sidebar:
         default_index=0,
     )
 
-# Load each page
 if selected == "🏠 Chatbot":
-    import HomeChatbotPage  # chatbot.py
+    import HomeChatbotPage
+    HomeChatbotPage.render()
 elif selected == "🧾 Farmer Credit Profile":
-    import farm_profile  # farm_profile.py
+    import farm_profile
+    farm_profile.render()
 elif selected == "📊 Lender Dashboard":
-    import lender_dashboard  # lender_dashboard.py
+    import lender_dashboard
+    lender_dashboard.render()
 elif selected == "📈 Insights & Feature Analysis":
-    import insights_feature_analysis  # insights_analysis.py
-
+    import insights_feature_analysis
+    insights_feature_analysis.render()
 
 st.markdown("---")
 st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
