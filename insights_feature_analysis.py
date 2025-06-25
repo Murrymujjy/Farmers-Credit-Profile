@@ -5,21 +5,22 @@ import joblib
 import plotly.express as px
 import shap
 import matplotlib.pyplot as plt
-
-# Disable shap warnings
 import warnings
+
+# Disable warnings
 warnings.filterwarnings("ignore")
 
-st.title("📈 Insights & Feature Analysis")
+def render():
+    st.title("📈 Insights & Feature Analysis")
 
-    # Load the model for SHAP (Random Forest is best for feature importance)    
-model = joblib.load("models/models_random_forest_model.pkl")
+    # Load model
+    model = joblib.load("models/models_random_forest_model.pkl")
 
-st.markdown("### 📂 Upload Farmer Dataset")
-uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
+    st.markdown("### 📂 Upload Farmer Dataset")
+    uploaded_file = st.file_uploader("Upload a CSV file", type=["csv"])
 
-if uploaded_file:
-   df = pd.read_csv(uploaded_file)
+    if uploaded_file:
+        df = pd.read_csv(uploaded_file)
 
         # Map and encode inputs
         education_mapping = {
@@ -44,15 +45,21 @@ if uploaded_file:
         features = df[['age', 'years_lived_in_community', 'education_encoded',
                        'phone_access', 'sector_encoded', 'women_access']]
 
+        # ✅ Predict loan approval for trend plot
+        df['Loan Approved (1=Yes)'] = model.predict(features)
+
+        # ✅ Sample data for SHAP speed
+        features_sampled = features.sample(n=min(200, len(features)), random_state=42)
+
         # SHAP explainer
         explainer = shap.TreeExplainer(model)
-        shap_values = explainer.shap_values(features)
+        shap_values = explainer.shap_values(features_sampled)
 
-        st.markdown("### 🔍 Feature Importance")
-        shap.summary_plot(shap_values[1], features, show=False)
-        st.pyplot(bbox_inches='tight')
+        st.markdown("### 🔍 Feature Importance (SHAP Summary Plot)")
+        shap.summary_plot(shap_values[1], features_sampled, show=False)
+        st.pyplot(plt.gcf())
 
-        # Optional: Show bar chart version
+        # Bar chart of average SHAP values
         st.markdown("### 📊 Mean Absolute SHAP Values")
         mean_abs_shap = np.abs(shap_values[1]).mean(axis=0)
         shap_df = pd.DataFrame({"Feature": features.columns, "Mean |SHAP|": mean_abs_shap})
@@ -61,6 +68,7 @@ if uploaded_file:
                      title="Top Features Impacting Loan Approval")
         st.plotly_chart(fig, use_container_width=True)
 
+        # Trend plot
         st.markdown("### 📉 Trend Exploration")
         selected = st.selectbox("Select a Feature to Explore", features.columns)
         fig2 = px.box(df, x='Loan Approved (1=Yes)', y=selected,
@@ -70,5 +78,5 @@ if uploaded_file:
     else:
         st.info("Please upload a CSV file with farmer data to view insights.")
 
-st.markdown("---")
-st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)

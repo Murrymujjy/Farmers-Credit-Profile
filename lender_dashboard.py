@@ -4,14 +4,13 @@ import numpy as np
 import joblib
 import plotly.express as px
 
-def render():  # 👈 required for app.py to import and call it
-    st.title("📊 Lender Dashboard - Farmer Credit Risk")
+  # 👈 required for app.py to import and call it
+st.title("📊 Lender Dashboard - Farmer Credit Risk")
 
 # Load models
 models = {
-    "Logistic Regression": joblib.load("models_logistic_regression_model.pkl"),
-    "Random Forest": joblib.load("models_random_forest_model.pkl"),
-    "Decision Tree": joblib.load("models_decision_tree_model.pkl")
+    "Logistic Regression": joblib.load("models/models_logistic_regression_model.pkl"),
+    "Decision Tree": joblib.load("models/models_decision_tree_model.pkl")
 }
 
 # Education mapping
@@ -43,38 +42,48 @@ uploaded_file = st.file_uploader("📂 Upload Farmer Data (CSV)", type=["csv"])
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
 
-    st.markdown("### 🔍 Select Model for Prediction")
-    selected_model = st.selectbox("Choose a model", list(models.keys()))
+    # ✅ Show columns found (for debugging)
+    st.write("📋 Columns in uploaded CSV:", df.columns.tolist())
 
-    # Preprocess
-    df['education_encoded'] = df['level_of_education'].map(education_mapping).fillna(8).astype(int)
-    df['phone_access'] = df['phone_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
-    df['sector_encoded'] = df['sector'].map(sector_map).fillna(0).astype(int)
-    df['women_access'] = df['women_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
+    # ✅ Check for required columns
+    required_columns = [
+        'age', 'years_lived_in_community', 'level_of_education',
+        'phone_access', 'sector', 'women_access'
+    ]
+    missing = [col for col in required_columns if col not in df.columns]
 
-    features = df[['age', 'years_lived_in_community', 'education_encoded',
-                   'phone_access', 'sector_encoded', 'women_access']]
+    if missing:
+        st.error(f"❌ Missing required column(s): {', '.join(missing)}")
+    else:
+        st.markdown("### 🔍 Select Model for Prediction")
+        selected_model = st.selectbox("Choose a model", list(models.keys()))
 
-    model = models[selected_model]
-    df['credit_prediction'] = model.predict(features)
-    if hasattr(model, "predict_proba"):
-        df['confidence_score'] = model.predict_proba(features)[:, 1]
+        # Preprocess
+        df['education_encoded'] = df['level_of_education'].map(education_mapping).fillna(8).astype(int)
+        df['phone_access'] = df['phone_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
+        df['sector_encoded'] = df['sector'].map(sector_map).fillna(0).astype(int)
+        df['women_access'] = df['women_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
 
-    # Rename for clarity
-    df.rename(columns={'credit_prediction': 'Loan Approved (1=Yes)', 'confidence_score': 'Confidence Score'}, inplace=True)
+        features = df[['age', 'years_lived_in_community', 'education_encoded',
+                       'phone_access', 'sector_encoded', 'women_access']]
 
-    # Show table
-    st.markdown("### 📋 Prediction Table")
-    st.dataframe(df[['age', 'level_of_education', 'sector', 'Loan Approved (1=Yes)', 'Confidence Score']])
+        model = models[selected_model]
+        df['credit_prediction'] = model.predict(features)
+        if hasattr(model, "predict_proba"):
+            df['confidence_score'] = model.predict_proba(features)[:, 1]
 
-    # Summary Chart
-    st.markdown("### 📊 Risk Summary")
-    fig = px.histogram(df, x='Loan Approved (1=Yes)', color='Loan Approved (1=Yes)',
-                       title="Loan Approval Distribution", nbins=2, text_auto=True)
-    st.plotly_chart(fig, use_container_width=True)
+        # Rename for clarity
+        df.rename(columns={'credit_prediction': 'Loan Approved (1=Yes)', 'confidence_score': 'Confidence Score'}, inplace=True)
 
-    # Download option
-    st.download_button("💾 Download Results as CSV", df.to_csv(index=False), "credit_predictions.csv", "text/csv")
+        # Show table
+        st.markdown("### 📋 Prediction Table")
+        st.dataframe(df[['age', 'level_of_education', 'sector', 'Loan Approved (1=Yes)', 'Confidence Score']])
 
-else:
-    st.info("Upload a CSV file containing farmer records with columns: age, years_lived_in_community, level_of_education, phone_access, sector, women_access")
+        # Summary Chart
+        st.markdown("### 📊 Risk Summary")
+        fig = px.histogram(df, x='Loan Approved (1=Yes)', color='Loan Approved (1=Yes)',
+                           title="Loan Approval Distribution", nbins=2, text_auto=True)
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Download option
+        st.download_button("💾 Download Results as CSV", df.to_csv(index=False), "credit_predictions.csv", "text/csv")
