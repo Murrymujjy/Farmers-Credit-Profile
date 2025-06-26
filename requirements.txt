@@ -8,3 +8,4 @@ plotly
 shap
 openai
 matplotlib
+streamlit-extras
