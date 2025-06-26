@@ -5,7 +5,7 @@ import farm_profile
 import lender_dashboard
 import insights_feature_analysis as insights
 
-# --- Background Theme ---
+# --- Custom CSS Styling ---
 def set_bg_animation():
     st.markdown("""
     <style>
@@ -20,40 +20,32 @@ def set_bg_animation():
     }
     .intro-text {
         font-size: 15px;
-        line-height: 1.5;
-        color: #333;
+        line-height: 1.6;
+        color: #222;
     }
     </style>
     """, unsafe_allow_html=True)
 
 set_bg_animation()
 
-# --- Navigation State ---
+# --- Setup Navigation Session State ---
 if "selected_nav" not in st.session_state:
     st.session_state.selected_nav = "🏠 Home"
 
-if "redirect_to" not in st.session_state:
-    st.session_state.redirect_to = None
+if "pending_redirect" not in st.session_state:
+    st.session_state.pending_redirect = None
 
-# Handle redirect
-if st.session_state.redirect_to:
-    st.session_state.selected_nav = st.session_state.redirect_to
-    st.session_state.redirect_to = None
-    st.experimental_rerun()
-
-# Sidebar
+# --- Sidebar Menu ---
 with st.sidebar:
     selected = option_menu("Navigation", 
         ["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard", "📈 Insights & Visualizations"],
         icons=["house", "robot", "file-earmark-text", "bar-chart-line", "graph-up"],
         default_index=["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard", "📈 Insights & Visualizations"].index(st.session_state.selected_nav)
     )
+    st.session_state.selected_nav = selected
 
-# Update state
-st.session_state.selected_nav = selected
-
-# --- HOME PAGE ---
-if selected == "🏠 Home":
+# --- MAIN LOGIC ---
+if st.session_state.selected_nav == "🏠 Home":
     st.title("🌾 Farmers Creditworthiness Platform")
 
     st.markdown("""
@@ -69,40 +61,41 @@ if selected == "🏠 Home":
         st.subheader("🤖 Chatbot")
         st.markdown("Ask natural language questions and get simulated credit advice.")
         if st.button("Open Chatbot"):
-            st.session_state.redirect_to = "🤖 Chatbot"
-            st.experimental_rerun()
+            st.session_state.pending_redirect = "🤖 Chatbot"
 
     with col2:
         st.subheader("📋 Farmer Profile")
         st.markdown("Enter a farmer's details to predict creditworthiness.")
         if st.button("Open Farmer Profile"):
-            st.session_state.redirect_to = "📋 Farmer Credit Profile"
-            st.experimental_rerun()
+            st.session_state.pending_redirect = "📋 Farmer Credit Profile"
 
     col3, col4 = st.columns(2)
     with col3:
         st.subheader("📊 Lender Dashboard")
         st.markdown("Upload CSV data and view loan predictions.")
         if st.button("Open Lender Dashboard"):
-            st.session_state.redirect_to = "📊 Lender Dashboard"
-            st.experimental_rerun()
+            st.session_state.pending_redirect = "📊 Lender Dashboard"
 
     with col4:
         st.subheader("📈 Insights & Analysis")
         st.markdown("Explore model reasoning and feature importance.")
         if st.button("Open Insights & Visualizations"):
-            st.session_state.redirect_to = "📈 Insights & Visualizations"
-            st.experimental_rerun()
+            st.session_state.pending_redirect = "📈 Insights & Visualizations"
 
-# --- Page Logic ---
-elif selected == "🤖 Chatbot":
+elif st.session_state.selected_nav == "🤖 Chatbot":
     HomeChatbotPage.render()
 
-elif selected == "📋 Farmer Credit Profile":
+elif st.session_state.selected_nav == "📋 Farmer Credit Profile":
     farm_profile.render()
 
-elif selected == "📊 Lender Dashboard":
+elif st.session_state.selected_nav == "📊 Lender Dashboard":
     lender_dashboard.render()
 
-elif selected == "📈 Insights & Visualizations":
+elif st.session_state.selected_nav == "📈 Insights & Visualizations":
     insights.render()
+
+# --- SAFE REDIRECT AT END OF SCRIPT ---
+if st.session_state.pending_redirect:
+    st.session_state.selected_nav = st.session_state.pending_redirect
+    st.session_state.pending_redirect = None
+    st.experimental_rerun()
