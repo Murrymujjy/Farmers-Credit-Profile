@@ -56,13 +56,13 @@ if selected == "🏠 Home":
     st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
 
 elif selected == "🤖 Chatbot":
-    HomeChatbotPage.render()
+    HomeChatbotPage
 
 elif selected == "📋 Farmer Credit Profile":
-    farm_profile.render()
+    farm_profile
 
 elif selected == "📊 Lender Dashboard":
-    lender_dashboard.render()
+    lender_dashboard
 
 # elif selected == "📈 Insights & Analysis":
    # try:
