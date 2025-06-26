@@ -3,93 +3,105 @@ import joblib
 import numpy as np
 import re
 
-def render():
-    # Load ML model
-    model = joblib.load("models_logistic_regression_model.pkl")
+# Load ML model
+model = joblib.load("models_logistic_regression_model.pkl")
 
-    st.title("🤖 AI Chatbot for Farmer Credit Scoring")
+st.title("🤖 AI Chatbot for Farmer Credit Scoring")
 
-    st.markdown("Ask questions like:")
-    st.markdown("- *Will a 40-year-old farmer in rural area with secondary education get a loan?*")
-    st.markdown("- *What is the credit score of a woman with access to phone and tertiary education?*")
+st.markdown("Ask questions like:")
+st.markdown("- *Will a 40-year-old farmer in rural area with secondary education get a loan?*")
+st.markdown("- *What is the credit score of a woman with access to phone and tertiary education?*")
 
-    # Session state
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "assistant", "content": "Hi there! I'm your AI credit scoring assistant. Ask me about any farmer profile and I’ll predict their creditworthiness."}
-        ]
+# Chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Hi there! I'm your AI credit scoring assistant. Ask me about any farmer profile and I’ll predict their creditworthiness."}
+    ]
 
-    # Display chat
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+# Display past messages
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-    # Mappings
-    education_mapping = {
-        'none': 0, 'nursery': 0,
-        'quaranic': 1, 'other religious': 1,
-        'primary': 2, 'adult education': 2,
-        'junior': 3, 'modern': 3, 'lower': 3, 'upper': 3,
-        'senior': 4, 'technical': 4, 'commercial': 4,
-        'teacher': 5, 'tertiary vocational': 5,
-        'polytechnic': 6, 'nce': 6, 'degree': 6, 'higher': 7,
-        'other': 8
-    }
-    sector_map = {"urban": 0, "rural": 1}
+# Mappings
+education_mapping = {
+    'none': 0, 'nursery': 0,
+    'quaranic': 1, 'other religious': 1,
+    'primary': 2, 'adult education': 2,
+    'junior': 3, 'modern': 3, 'lower': 3, 'upper': 3,
+    'senior': 4, 'technical': 4, 'commercial': 4,
+    'teacher': 5, 'tertiary vocational': 5,
+    'polytechnic': 6, 'nce': 6, 'degree': 6, 'higher': 7,
+    'other': 8
+}
+sector_map = {"urban": 0, "rural": 1}
 
-    # Extract features from user input
-    def parse_input(text):
-        text = text.lower()
+def parse_input(text):
+    text = text.lower()
+    age_match = re.search(r"(\d+)\s*year", text)
+    age = int(age_match.group(1)) if age_match else 30
+    years_lived = 5
 
-        # Extract age
-        age_match = re.search(r"(\d+)\s*year", text)
-        age = int(age_match.group(1)) if age_match else 30
+    education_encoded = 8
+    for key in education_mapping:
+        if key in text:
+            education_encoded = education_mapping[key]
+            break
 
-        # Default years in community
-        years_lived = 5
+    phone = 1 if "has phone" in text or "access to phone" in text else 0
+    sector_encoded = 1 if "rural" in text else 0
+    women_access = 1 if "woman" in text and "support" in text else 0
 
-        # Education
-        education_encoded = 8
-        for key in education_mapping:
-            if key in text:
-                education_encoded = education_mapping[key]
-                break
+    return np.array([[age, years_lived, education_encoded, phone, sector_encoded, women_access]])
 
-        # Phone access
-        phone = 1 if "has phone" in text or "access to phone" in text else 0
+# User input
+prompt = st.chat_input("Type your question here...")
 
-        # Sector
-        sector_encoded = 1 if "rural" in text else 0
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-        # Women access
-        women_access = 1 if "woman" in text and "support" in text else 0
+    with st.chat_message("assistant"):
+        with st.spinner("Analyzing..."):
+            try:
+                X = parse_input(prompt)
+                prediction = model.predict(X)[0]
+                prob = model.predict_proba(X)[0][1]
+                if prediction == 1:
+                    reply = f"✅ This farmer is likely to get a loan! (Confidence: **{prob:.2f}**)"
+                else:
+                    reply = f"⚠️ This farmer might be considered high risk. (Confidence: **{prob:.2f}**)"
+            except Exception as e:
+                reply = "❌ Sorry, I couldn’t understand or process your request."
 
-        return np.array([[age, years_lived, education_encoded, phone, sector_encoded, women_access]])
+            st.markdown(reply)
+            st.session_state.messages.append({"role": "assistant", "content": reply})
 
-    # Chat input
-    prompt = st.chat_input("Type your question here...")
+# Navigation Buttons
+st.markdown("---")
+st.markdown("## 🚀 Quick Navigation")
 
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+col1, col2 = st.columns(2)
 
-        with st.chat_message("assistant"):
-            with st.spinner("Analyzing..."):
-                try:
-                    X = parse_input(prompt)
-                    prediction = model.predict(X)[0]
-                    prob = model.predict_proba(X)[0][1]
+with col1:
+    if st.button("📋 Farmer Credit Profile"):
+        st.session_state.page = "📋 Farmer Credit Profile"
+        st.experimental_rerun()
 
-                    if prediction == 1:
-                        reply = f"✅ This farmer is likely to get a loan! (Confidence: **{prob:.2f}**)"
-                    else:
-                        reply = f"⚠️ This farmer might be considered high risk. (Confidence: **{prob:.2f}**)"
-                except Exception:
-                    reply = "❌ Sorry, I couldn’t understand or process your request."
+    if st.button("📈 Insights & Analysis"):
+        st.session_state.page = "📈 Insights & Analysis"
+        st.experimental_rerun()
 
-                st.markdown(reply)
-                st.session_state.messages.append({"role": "assistant", "content": reply})
+with col2:
+    if st.button("📊 Lender Dashboard"):
+        st.session_state.page = "📊 Lender Dashboard"
+        st.experimental_rerun()
 
-    st.markdown("---")
-    st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
+    if st.button("🤖 Chatbot"):
+        st.session_state.page = "🤖 Chatbot"
+        st.experimental_rerun()
+
+# Footer
+st.markdown("---")
+st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
