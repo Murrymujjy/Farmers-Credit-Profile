@@ -1,4 +1,10 @@
 import streamlit as st
+import joblib
+import numpy as np
+import re
+
+# Load ML model
+model = joblib.load("models_logistic_regression_model.pkl")
 
 st.title("🤖 AI Chatbot for Farmer Credit Scoring")
 
@@ -6,56 +12,58 @@ st.markdown("Ask questions like:")
 st.markdown("- *Will a 40-year-old farmer in rural area with secondary education get a loan?*")
 st.markdown("- *What is the credit score of a woman with access to phone and tertiary education?*")
 
-# Chat history
+# Session state
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        {"role": "assistant", "content": "Hi there! I'm your offline credit scoring assistant. Ask me about any farmer profile and I’ll give you a simulated answer."}
+        {"role": "assistant", "content": "Hi there! I'm your AI credit scoring assistant. Ask me about any farmer profile and I’ll predict their creditworthiness."}
     ]
 
-# Display messages
+# Display chat
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Simulated rule-based reply
-def get_simulated_reply(user_input):
-    user_input = user_input.lower()
+# Mappings
+education_mapping = {
+    'none': 0, 'nursery': 0,
+    'quaranic': 1, 'other religious': 1,
+    'primary': 2, 'adult education': 2,
+    'junior': 3, 'modern': 3, 'lower': 3, 'upper': 3,
+    'senior': 4, 'technical': 4, 'commercial': 4,
+    'teacher': 5, 'tertiary vocational': 5,
+    'polytechnic': 6, 'nce': 6, 'degree': 6, 'higher': 7,
+    'other': 8
+}
+sector_map = {"urban": 0, "rural": 1}
 
-    score = 0
-    if "age" in user_input:
-        if any(x in user_input for x in ["young", "below 25", "under 25"]):
-            score -= 1
-        elif any(x in user_input for x in ["40", "middle age", "experienced"]):
-            score += 1
+# Extract features from user input
+def parse_input(text):
+    text = text.lower()
 
-    if "education" in user_input:
-        if "tertiary" in user_input or "degree" in user_input:
-            score += 2
-        elif "secondary" in user_input:
-            score += 1
-        elif "none" in user_input:
-            score -= 1
+    # Extract age
+    age_match = re.search(r"(\d+)\s*year", text)
+    age = int(age_match.group(1)) if age_match else 30
 
-    if "rural" in user_input:
-        score += 1
-    if "urban" in user_input:
-        score += 0  # neutral
+    # Assume years lived (not often mentioned)
+    years_lived = 5
 
-    if "phone" in user_input:
-        if "no phone" in user_input:
-            score -= 1
-        elif "has phone" in user_input or "access to phone" in user_input:
-            score += 1
+    # Education
+    education_encoded = 8
+    for key in education_mapping:
+        if key in text:
+            education_encoded = education_mapping[key]
+            break
 
-    if "woman" in user_input and "support" in user_input:
-        score += 1
+    # Phone
+    phone = 1 if "has phone" in text or "access to phone" in text else 0
 
-    if score >= 3:
-        return "✅ This farmer is highly likely to be eligible for a loan!"
-    elif score >= 1:
-        return "🟡 This farmer has a moderate chance of getting a loan."
-    else:
-        return "⚠️ This farmer might be considered high risk."
+    # Sector
+    sector_encoded = 1 if "rural" in text else 0
+
+    # Women access
+    women_access = 1 if "woman" in text and "support" in text else 0
+
+    return np.array([[age, years_lived, education_encoded, phone, sector_encoded, women_access]])
 
 # Chat input
 prompt = st.chat_input("Type your question here...")
@@ -67,7 +75,18 @@ if prompt:
 
     with st.chat_message("assistant"):
         with st.spinner("Analyzing..."):
-            reply = get_simulated_reply(prompt)
+            try:
+                X = parse_input(prompt)
+                prediction = model.predict(X)[0]
+                prob = model.predict_proba(X)[0][1]
+
+                if prediction == 1:
+                    reply = f"✅ This farmer is likely to get a loan! (Confidence: **{prob:.2f}**)"
+                else:
+                    reply = f"⚠️ This farmer might be considered high risk. (Confidence: **{prob:.2f}**)"
+            except Exception as e:
+                reply = "❌ Sorry, I couldn’t understand or process your request."
+
             st.markdown(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
 
