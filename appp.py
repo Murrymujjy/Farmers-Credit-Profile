@@ -1,9 +1,12 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import HomeChatbotPage
-import farm_profile
-import lender_dashboard
-import insights_feature_analysis
+# import HomeChatbotPage
+# import farm_profile
+# import lender_dashboard
+# import insights_feature_analysis
+
+#import streamlit as st
+st.write("✅ App is loading… main.py reached start")
 
 # ---- Background Animation ----
 def set_bg_animation():
