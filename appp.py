@@ -3,28 +3,33 @@ from streamlit_option_menu import option_menu
 import HomeChatbotPage
 import farm_profile
 import lender_dashboard
-# import insights_feature_analysis
+import insights_feature_analysis as insights
 
 # st.write("✅ App is loading… main.py reached start")
 
 # ---- Background Animation ----
 def set_bg_animation():
     st.markdown("""
-        <style>
-        .stApp {
-            background-color: #f9f9f9;
-            background-image: url("https://www.transparenttextures.com/patterns/clean-gray-paper.png");
-        }
-        </style>
-    """, unsafe_allow_html=True)
+    <style>
+    .main {
+        background-color: #e6f0ff;  /* Light blue */
+        padding: 20px;
+        border-radius: 10px;
+    }
+    .stButton>button {
+        color: white;
+        background-color: #1f77b4; /* Professional blue */
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 set_bg_animation()
 
 # ---- Sidebar Navigation ----
 with st.sidebar:
     selected = option_menu("Navigation", 
-        ["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard"],
-        icons=["house", "robot", "file-earmark-text", "bar-chart-line"],
+        ["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard", "📈 Insights & Visualizations"],
+        icons=["house", "robot", "file-earmark-text", "bar-chart-line", "graph-up"],
         default_index=0)
 
 # ---- Main Area Logic ----
@@ -48,9 +53,9 @@ if selected == "🏠 Home":
     with col3:
         st.markdown("### 📊 Lender Dashboard")
         st.markdown("Upload CSV data and view loan predictions.")
-    # with col4:
-        # st.markdown("### 📈 Insights & Analysis")
-        # st.markdown("Explore model reasoning and feature importance.")
+    with col4:
+        st.markdown("### 📈 Insights & Analysis")
+        st.markdown("Explore model reasoning and feature importance.")
 
     st.markdown("---")
    # st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
@@ -64,9 +69,5 @@ elif selected == "📋 Farmer Credit Profile":
 elif selected == "📊 Lender Dashboard":
     lender_dashboard.render()
 
-# elif selected == "📈 Insights & Analysis":
-   # try:
-    #    insights_feature_analysis.render()
-    # except Exception as e:
-      #  st.error("🚨 Error loading insights page.")
-       # st.exception(e)
+elif selected == "📈 Insights & Visualizations":
+    insights.render()
