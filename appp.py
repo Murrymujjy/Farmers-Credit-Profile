@@ -53,16 +53,16 @@ if selected == "🏠 Home":
         # st.markdown("Explore model reasoning and feature importance.")
 
     st.markdown("---")
-    st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
+   # st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
 
 elif selected == "🤖 Chatbot":
-    HomeChatbotPage
+    HomeChatbotPage.render()
 
 elif selected == "📋 Farmer Credit Profile":
-    farm_profile
+    farm_profile.render()
 
 elif selected == "📊 Lender Dashboard":
-    lender_dashboard
+    lender_dashboard.render()
 
 # elif selected == "📈 Insights & Analysis":
    # try:
