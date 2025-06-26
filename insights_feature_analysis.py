@@ -9,13 +9,12 @@ import warnings
 warnings.filterwarnings("ignore")
 
 def render():
-    st.title("📈 Insights & Feature Analysis")
-
-    # Load model
+    st.write("✅ Insights.render() is running")
     try:
-        model = joblib.load("models_logistic_regression_model.pkl")
+        model = joblib.load("models_random_forest_model.pkl")
+        st.write("✅ Model loaded successfully")
     except Exception as e:
-        st.error("❌ Failed to load model.")
+        st.error("Failed to load model")
         st.exception(e)
         return
 
