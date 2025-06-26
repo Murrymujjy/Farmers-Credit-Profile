@@ -5,7 +5,7 @@ import farm_profile
 import lender_dashboard
 # import insights_feature_analysis
 
-st.write("✅ App is loading… main.py reached start")
+# st.write("✅ App is loading… main.py reached start")
 
 # ---- Background Animation ----
 def set_bg_animation():
