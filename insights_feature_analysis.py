@@ -1,76 +1,49 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import joblib
 import plotly.express as px
-import io
-import warnings
 
-warnings.filterwarnings("ignore")
+powerbi_url = "https://app.fabric.microsoft.com/view?r=eyJrIjoiNTlhYTAwMDgtZGVkOS00NTEzLWE0ZjktMzM4Y2Y5ZWE2MTg0IiwidCI6Ijg4ZTlhN2RjLTU2MzMtNGM2Ni1iNjZjLTkyZGY1Y2E3NDhmYyJ9"
 
 def render():
-    st.write("✅ Insights.render() is running")
-    try:
-        model = joblib.load("models_random_forest_model.pkl")
-        st.write("✅ Model loaded successfully")
-    except Exception as e:
-        st.error("Failed to load model")
-        st.exception(e)
-        return
+    st.title("📈 Insights & Visualizations")
 
-    # Sample CSV download
-    sample_data = pd.DataFrame({
-        "age": [30, 45],
-        "years_lived_in_community": [5, 20],
-        "level_of_education": ["SENIOR SECONDARY", "1st DEGREE"],
-        "phone_access": ["Yes", "No"],
-        "sector": ["Rural", "Urban"],
-        "women_access": ["Yes", "No"]
-    })
+    # Embed Power BI dashboard
+    st.markdown("### 🧠 Power BI Dashboard")
+    st.components.v1.iframe(powerbi_url, height=800, width=1200)
 
-    buffer = io.BytesIO()
-    sample_data.to_csv(buffer, index=False)
-    buffer.seek(0)
-
-    st.download_button("📥 Download Sample CSV", buffer, file_name="sample.csv", mime="text/csv")
-
-    uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
+    # Upload CSV for additional visualizations
+    st.markdown("### 📂 Upload Prediction Data (CSV)")
+    uploaded_file = st.file_uploader("Upload the prediction results (e.g. credit_predictions.csv)", type="csv")
 
     if uploaded_file:
-        try:
-            df = pd.read_csv(uploaded_file)
+        df = pd.read_csv(uploaded_file)
 
-            # Encode features
-            education_mapping = {
-                'NONE': 0, 'NURSERY': 0, 'QUARANIC/INTEGRATED QUARANIC': 1,
-                'OTHER RELIGIOUS': 1, 'PRIMARY': 2, 'ADULT EDUCATION': 2,
-                'JUNIOR SECONDARY': 3, 'MODERN SCHOOL': 3, 'LOWER/UPPER 6': 3,
-                'SENIOR SECONDARY': 4, 'SECONDARY VOCATIONAL/TECHNICAL/COMMERCIAL': 4,
-                'TEACHER TRAINING': 5, 'TERTIARY VOCATIONAL/TECHNICAL/COMMERCIAL': 5,
-                'POLYTECHNIC/PROF': 6, 'NATIONAL CERTIFICATE OF EDUCATION (NCE)': 6,
-                '1st DEGREE': 6, 'HIGHER DEGREE (POST-GRADUATE)': 7, 'OTHER': 8
-            }
+        # Check for required columns
+        if 'Loan Approved (1=Yes)' in df.columns and 'Confidence Score' in df.columns:
+            st.markdown("### 📊 Loan Approval by Education Level")
+            fig1 = px.histogram(df, x="level_of_education", color="Loan Approved (1=Yes)",
+                                barmode="group", title="Approval by Education Level")
+            st.plotly_chart(fig1, use_container_width=True)
 
-            sector_map = {"Urban": 0, "Rural": 1}
+            st.markdown("### 📞 Approval Confidence by Phone Access")
+            if 'phone_access' in df.columns:
+                fig2 = px.box(df, x="phone_access", y="Confidence Score", color="Loan Approved (1=Yes)",
+                             title="Confidence Score vs Phone Access")
+                st.plotly_chart(fig2, use_container_width=True)
 
-            df['education_encoded'] = df['level_of_education'].map(education_mapping).fillna(8).astype(int)
-            df['phone_access'] = df['phone_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
-            df['sector_encoded'] = df['sector'].map(sector_map).fillna(0).astype(int)
-            df['women_access'] = df['women_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
+            st.markdown("### 🌍 Approval by Sector")
+            if 'sector' in df.columns:
+                fig3 = px.histogram(df, x="sector", color="Loan Approved (1=Yes)", barmode="group",
+                                    title="Approval by Sector")
+                st.plotly_chart(fig3, use_container_width=True)
 
-            features = df[['age', 'years_lived_in_community', 'education_encoded',
-                           'phone_access', 'sector_encoded', 'women_access']]
-
-            # Predict
-            df['Loan Approved (1=Yes)'] = model.predict(features)
-
-            st.markdown("### 📊 Trend Visualization")
-            selected = st.selectbox("Choose a feature to analyze", features.columns)
-            fig = px.box(df, x="Loan Approved (1=Yes)", y=selected, color="Loan Approved (1=Yes)")
-            st.plotly_chart(fig, use_container_width=True)
-
-        except Exception as e:
-            st.error("❌ Error processing the uploaded file.")
-            st.exception(e)
+            st.markdown("### 📉 Confidence Score Distribution")
+            fig4 = px.histogram(df, x="Confidence Score", nbins=20, title="Distribution of Confidence Scores")
+            st.plotly_chart(fig4, use_container_width=True)
+        else:
+            st.warning("Required columns not found in uploaded data. Please upload a valid prediction CSV file.")
     else:
-        st.info("Please upload a CSV file to explore insights.")
+        st.info("Upload a CSV file to see dynamic charts.")
+
+    st.markdown("---")
+    st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
