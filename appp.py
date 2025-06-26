@@ -74,10 +74,10 @@ elif selected == "🤖 Chatbot":
     HomeChatbotPage
 
 elif selected == "📋 Farmer Credit Profile":
-    farm_profile
+    farm_profile.render()
 
 elif selected == "📊 Lender Dashboard":
-    lender_dashboard
+    lender_dashboard.render()
 
 elif selected == "📈 Insights & Analysis":
     insights_feature_analysis.render()
