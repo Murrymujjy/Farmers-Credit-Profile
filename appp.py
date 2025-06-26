@@ -5,34 +5,35 @@ import farm_profile
 import lender_dashboard
 import insights_feature_analysis as insights
 
-# st.write("✅ App is loading… main.py reached start")
-
-# ---- Background Animation ----
+# ---- Background + Button Styling ----
 def set_bg_animation():
     st.markdown("""
     <style>
     .main {
-        background-color: #e6f0ff;  /* Light blue */
+        background-color: #e6f0ff;
         padding: 20px;
         border-radius: 10px;
     }
     .stButton>button {
         color: white;
-        background-color: #1f77b4; /* Professional blue */
+        background-color: #1f77b4;
+        border-radius: 8px;
     }
     </style>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 set_bg_animation()
 
 # ---- Sidebar Navigation ----
 with st.sidebar:
-    selected = option_menu("Navigation", 
+    selected = option_menu(
+        "Navigation", 
         ["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard", "📈 Insights & Visualizations"],
         icons=["house", "robot", "file-earmark-text", "bar-chart-line", "graph-up"],
-        default_index=0)
+        default_index=0
+    )
 
-# ---- Main Area Logic ----
+# ---- Main Area ----
 if selected == "🏠 Home":
     st.title("🌾 Farmers Creditworthiness Platform")
     st.markdown("""
@@ -43,22 +44,33 @@ if selected == "🏠 Home":
 
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown("### 🤖 Chatbot")
+        st.subheader("🤖 Chatbot")
         st.markdown("Ask natural language questions and get simulated credit advice.")
+        if st.button("Go to Chatbot"):
+            st.session_state.selected = "🤖 Chatbot"
+            st.experimental_rerun()
+
     with col2:
-        st.markdown("### 📋 Farmer Profile")
+        st.subheader("📋 Farmer Profile")
         st.markdown("Enter a farmer's details to predict creditworthiness.")
+        if st.button("Go to Farmer Profile"):
+            st.session_state.selected = "📋 Farmer Credit Profile"
+            st.experimental_rerun()
 
     col3, col4 = st.columns(2)
     with col3:
-        st.markdown("### 📊 Lender Dashboard")
+        st.subheader("📊 Lender Dashboard")
         st.markdown("Upload CSV data and view loan predictions.")
-    with col4:
-        st.markdown("### 📈 Insights & Analysis")
-        st.markdown("Explore model reasoning and feature importance.")
+        if st.button("Go to Lender Dashboard"):
+            st.session_state.selected = "📊 Lender Dashboard"
+            st.experimental_rerun()
 
-    st.markdown("---")
-   # st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
+    with col4:
+        st.subheader("📈 Insights & Visualizations")
+        st.markdown("Explore model reasoning and feature importance.")
+        if st.button("Go to Insights & Visualizations"):
+            st.session_state.selected = "📈 Insights & Visualizations"
+            st.experimental_rerun()
 
 elif selected == "🤖 Chatbot":
     HomeChatbotPage.render()
