@@ -1,81 +1,67 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
-import plotly.express as px
 
 def render():
-    st.title("📊 Lender Dashboard - Farmer Credit Risk")
+    st.title("📊 Lender Dashboard - Batch Credit Scoring")
+    st.markdown("""
+    Upload a CSV file containing farmer data to get creditworthiness predictions in bulk.  
+    Make sure your CSV includes the following columns:
+    - `age`: Age of the farmer
+    - `years_in_community`: Years the farmer has lived in the community
+    - `education_level`: Encoded education level (0–8)
+    - `has_phone`: 1 if the farmer has phone access, else 0
+    - `sector`: 1 for rural, 0 for urban
+    - `women_access_support`: 1 if woman with access to support, else 0
+    """)
 
-    # Load models
-    models = {
-        "Logistic Regression": joblib.load("models_logistic_regression_model.pkl"),
-        "Decision Tree": joblib.load("models_decision_tree_model.pkl")
-    }
+    # --- Download Sample CSV ---
+    sample_data = pd.DataFrame({
+        "age": [35, 42],
+        "years_in_community": [10, 7],
+        "education_level": [4, 6],
+        "has_phone": [1, 0],
+        "sector": [1, 0],
+        "women_access_support": [1, 0]
+    })
 
-    # Education mapping
-    education_mapping = {
-        'NONE': 0, 'NURSERY': 0,
-        'QUARANIC/INTEGRATED QUARANIC': 1, 'OTHER RELIGIOUS': 1,
-        'PRIMARY': 2, 'ADULT EDUCATION': 2,
-        'JUNIOR SECONDARY': 3, 'MODERN SCHOOL': 3, 'LOWER/UPPER 6': 3,
-        'SENIOR SECONDARY': 4, 'SECONDARY VOCATIONAL/TECHNICAL/COMMERCIAL': 4,
-        'TEACHER TRAINING': 5, 'TERTIARY VOCATIONAL/TECHNICAL/COMMERCIAL': 5,
-        'POLYTECHNIC/PROF': 6, 'NATIONAL CERTIFICATE OF EDUCATION (NCE)': 6,
-        '1st DEGREE': 6, 'HIGHER DEGREE (POST-GRADUATE)': 7,
-        'OTHER': 8
-    }
+    csv = sample_data.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download Sample CSV",
+        data=csv,
+        file_name="sample_farmers.csv",
+        mime="text/csv",
+        help="Download a sample CSV with the correct format for predictions."
+    )
 
-    sector_map = {"Urban": 0, "Rural": 1}
-
-    # Upload CSV
-    uploaded_file = st.file_uploader("📂 Upload Farmer Data (CSV)", type=["csv"])
+    # --- Upload Section ---
+    uploaded_file = st.file_uploader("📤 Upload CSV file", type=["csv"])
 
     if uploaded_file:
-        df = pd.read_csv(uploaded_file)
+        try:
+            df = pd.read_csv(uploaded_file)
+            st.write("🔍 Uploaded Data Preview:")
+            st.dataframe(df)
 
-        # ✅ Show columns found (for debugging)
-        st.write("📋 Columns in uploaded CSV:", df.columns.tolist())
+            required_columns = {"age", "years_in_community", "education_level", "has_phone", "sector", "women_access_support"}
+            if not required_columns.issubset(df.columns):
+                missing = required_columns - set(df.columns)
+                st.error(f"❌ Missing required columns: {', '.join(missing)}")
+                return
 
-        # ✅ Check for required columns
-        required_columns = [
-            'age', 'years_lived_in_community', 'level_of_education',
-            'phone_access', 'sector', 'women_access'
-        ]
-        missing = [col for col in required_columns if col not in df.columns]
+            model = joblib.load("models_logistic_regression_model.pkl")
+            predictions = model.predict(df)
+            probabilities = model.predict_proba(df)[:, 1]
 
-        if missing:
-            st.error(f"❌ Missing required column(s): {', '.join(missing)}")
-        else:
-            st.markdown("### 🔍 Select Model for Prediction")
-            selected_model = st.selectbox("Choose a model", list(models.keys()))
+            df["Prediction"] = ["✅ Approved" if p == 1 else "❌ Declined" for p in predictions]
+            df["Confidence"] = [f"{prob:.2f}" for prob in probabilities]
 
-            # Preprocess
-            df['education_encoded'] = df['level_of_education'].map(education_mapping).fillna(8).astype(int)
-            df['phone_access'] = df['phone_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
-            df['sector_encoded'] = df['sector'].map(sector_map).fillna(0).astype(int)
-            df['women_access'] = df['women_access'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
+            st.success("🎯 Predictions Generated Successfully!")
+            st.write(df)
 
-            features = df[['age', 'years_lived_in_community', 'education_encoded',
-                        'phone_access', 'sector_encoded', 'women_access']]
+            result_csv = df.to_csv(index=False).encode("utf-8")
+            st.download_button("⬇️ Download Results as CSV", result_csv, file_name="credit_predictions.csv", mime="text/csv")
 
-            model = models[selected_model]
-            df['credit_prediction'] = model.predict(features)
-            if hasattr(model, "predict_proba"):
-                df['confidence_score'] = model.predict_proba(features)[:, 1]
-
-            # Rename for clarity
-            df.rename(columns={'credit_prediction': 'Loan Approved (1=Yes)', 'confidence_score': 'Confidence Score'}, inplace=True)
-
-            # Show table
-            st.markdown("### 📋 Prediction Table")
-            st.dataframe(df[['age', 'level_of_education', 'sector', 'Loan Approved (1=Yes)', 'Confidence Score']])
-
-            # Summary Chart
-            st.markdown("### 📊 Risk Summary")
-            fig = px.histogram(df, x='Loan Approved (1=Yes)', color='Loan Approved (1=Yes)',
-                            title="Loan Approval Distribution", nbins=2, text_auto=True)
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Download option
-            st.download_button("💾 Download Results as CSV", df.to_csv(index=False), "credit_predictions.csv", "text/csv")
+        except Exception as e:
+            st.error("⚠️ Failed to process the uploaded file. Please make sure it matches the sample format.")
+            st.exception(e)
