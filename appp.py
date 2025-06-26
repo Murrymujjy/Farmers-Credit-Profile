@@ -5,82 +5,84 @@ import farm_profile
 import lender_dashboard
 import insights_feature_analysis as insights
 
-# --- Custom CSS Styling ---
+# ---- Background Style ----
 def set_bg_animation():
     st.markdown("""
     <style>
     .main {
-        background-color: #e6f0ff;
+        background-color: #e6f0ff;  /* Light blue */
         padding: 20px;
         border-radius: 10px;
     }
     .stButton>button {
         color: white;
-        background-color: #1f77b4;
-    }
-    .intro-text {
-        font-size: 15px;
-        line-height: 1.6;
-        color: #222;
+        background-color: #1f77b4; /* Professional blue */
     }
     </style>
     """, unsafe_allow_html=True)
 
 set_bg_animation()
 
-# --- Setup Navigation Session State ---
+# ---- Redirect Handling ----
 if "selected_nav" not in st.session_state:
     st.session_state.selected_nav = "🏠 Home"
 
-if "pending_redirect" not in st.session_state:
+# Handle internal link clicks
+if "pending_redirect" in st.session_state and st.session_state.pending_redirect:
+    st.session_state.selected_nav = st.session_state.pending_redirect
     st.session_state.pending_redirect = None
+    st.rerun()
 
-# --- Sidebar Menu ---
+# ---- Sidebar Navigation ----
 with st.sidebar:
-    selected = option_menu("Navigation", 
+    selected = option_menu(
+        "Navigation",
         ["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard", "📈 Insights & Visualizations"],
         icons=["house", "robot", "file-earmark-text", "bar-chart-line", "graph-up"],
-        default_index=["🏠 Home", "🤖 Chatbot", "📋 Farmer Credit Profile", "📊 Lender Dashboard", "📈 Insights & Visualizations"].index(st.session_state.selected_nav)
+        default_index=0,
+        key="nav"
     )
     st.session_state.selected_nav = selected
 
-# --- MAIN LOGIC ---
+# ---- Main Area Logic ----
 if st.session_state.selected_nav == "🏠 Home":
     st.title("🌾 Farmers Creditworthiness Platform")
-
-    st.markdown("""
-    <div class="intro-text">
-    Welcome to <strong>Farmers Credit Scoring App</strong>, your intelligent tool for evaluating loan eligibility of farmers.  
-    Built with 💡 machine learning, this platform supports both <strong>farmers</strong> and <strong>lenders</strong> in making data-driven decisions.
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("---")
+    st.markdown(
+        """
+        <div style='font-size:15px'>
+        Welcome to <b>Farmers Credit Scoring App</b>, your intelligent tool for evaluating loan eligibility of farmers.<br>
+        Built with 💡 machine learning, this platform supports both <b>farmers</b> and <b>lenders</b> in making data-driven decisions.
+        </div>
+        <hr>
+        """, unsafe_allow_html=True
+    )
 
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("🤖 Chatbot")
-        st.markdown("Ask natural language questions and get simulated credit advice.")
-        if st.button("Open Chatbot"):
+        st.markdown("### 🤖 Chatbot")
+        if st.button("Go to Chatbot"):
             st.session_state.pending_redirect = "🤖 Chatbot"
-
+            st.rerun()
     with col2:
-        st.subheader("📋 Farmer Profile")
-        st.markdown("Enter a farmer's details to predict creditworthiness.")
-        if st.button("Open Farmer Profile"):
+        st.markdown("### 📋 Farmer Profile")
+        if st.button("Go to Farmer Profile"):
             st.session_state.pending_redirect = "📋 Farmer Credit Profile"
+            st.rerun()
 
     col3, col4 = st.columns(2)
     with col3:
-        st.subheader("📊 Lender Dashboard")
-        st.markdown("Upload CSV data and view loan predictions.")
-        if st.button("Open Lender Dashboard"):
+        st.markdown("### 📊 Lender Dashboard")
+        if st.button("Go to Lender Dashboard"):
             st.session_state.pending_redirect = "📊 Lender Dashboard"
-
+            st.rerun()
     with col4:
-        st.subheader("📈 Insights & Analysis")
-        st.markdown("Explore model reasoning and feature importance.")
-        if st.button("Open Insights & Visualizations"):
+        st.markdown("### 📈 Insights & Analysis")
+        if st.button("Go to Insights & Visualizations"):
             st.session_state.pending_redirect = "📈 Insights & Visualizations"
+            st.rerun()
+
+    st.markdown("---")
+    # st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
 
 elif st.session_state.selected_nav == "🤖 Chatbot":
     HomeChatbotPage.render()
@@ -93,9 +95,3 @@ elif st.session_state.selected_nav == "📊 Lender Dashboard":
 
 elif st.session_state.selected_nav == "📈 Insights & Visualizations":
     insights.render()
-
-# --- SAFE REDIRECT AT END OF SCRIPT ---
-if st.session_state.pending_redirect:
-    st.session_state.selected_nav = st.session_state.pending_redirect
-    st.session_state.pending_redirect = None
-    st.experimental_rerun()
