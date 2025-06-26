@@ -13,7 +13,7 @@ def render():
 
     # Load model
     try:
-        model = joblib.load("models_random_forest_model.pkl")
+        model = joblib.load("models_logistic_regression_model.pkl")
     except Exception as e:
         st.error("❌ Failed to load model.")
         st.exception(e)
