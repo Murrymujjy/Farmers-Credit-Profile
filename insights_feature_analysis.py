@@ -80,7 +80,7 @@ def render():
             shap_values = explainer.shap_values(features_sampled)
 
             st.markdown("### 🔍 Feature Importance (SHAP Summary Plot)")
-            shap.summary_plot(shap_values[1], features_sampled, show=False)
+            # shap.summary_plot(shap_values[1], features_sampled, show=False)
             st.pyplot(plt.gcf())
 
             st.markdown("### 📊 Mean Absolute SHAP Values")
