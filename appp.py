@@ -75,7 +75,7 @@ if st.session_state.selected_nav == "🏠 Home":
             st.rerun()
 
     st.markdown("---")
-    st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Team Numerixa</strong></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center;'>📌 Made with ❤️ by <strong>Farm Ledger</strong></div>", unsafe_allow_html=True)
 
 # ---- Pages ----
 elif st.session_state.selected_nav == "🤖 Chatbot":
@@ -89,3 +89,4 @@ elif st.session_state.selected_nav == "📊 Lender Dashboard":
 
 elif st.session_state.selected_nav == "📈 Insights & Visualizations":
     insights.render()
+
