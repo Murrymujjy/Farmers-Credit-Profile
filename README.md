@@ -6,7 +6,7 @@ A user-friendly AI-powered web application that predicts the creditworthiness of
 
 ## 🌍 Live Demo
 
-Check out the hosted app: [Power BI Dashboard](https://app.fabric.microsoft.com/view?r=eyJrIjoiNTlhYTAwMDgtZGVkOS00NTEzLWE0ZjktMzM4Y2Y5ZWE2MTg0IiwidCI6Ijg4ZTlhN2RjLTU2MzMtNGM2Ni1iNjZjLTkyZGY1Y2E3NDhmYyJ9)
+Check out the hosted app: [Streamlit App](https://farmers-credit-profile-numerixa.streamlit.app/)
 
 ---
 
