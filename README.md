@@ -95,8 +95,11 @@ streamlit run app/app.py
 
 **Mujeebat Muritala** – Machine Learning Engineer passionate about building practical AI solutions.
 [LinkedIn](https://www.linkedin.com/in/mujeebat-muritala-134210175)
+
 **Lawal AbdSalam** - Data Analyst 
+
 **Aderoju AbdulSalam** - Machine Learning Engineer and Pipeline Expert 
+
 **Owodunni Aminat** - Data Engineer 
 
 ---
