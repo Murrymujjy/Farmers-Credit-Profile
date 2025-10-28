@@ -9,3 +9,5 @@ shap
 openai
 matplotlib
 streamlit-extras
+fastapi
+uvicorn
